@@ -19,9 +19,19 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
+        'email',
+        'nama_lengkap',
+        'role',
+        'no_hp',
+        'foto',
+        'alamat',
+        'status',
+        'email_verified_at',
+        'verification_token',
+        'google_id',
+        'oauth_provider',
     ];
 
     /**
@@ -31,7 +41,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        'verification_token',
     ];
 
     /**
@@ -46,4 +56,31 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function logAktivitas()
+    {
+        return $this->hasMany(LogAKtivitas::class, 'id_user');
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->email_verified_at !== null;
+    }
+    
+    public function isActive(): bool
+    {
+        return $this->status === 'aktif';
+    }
+    
+    public function isAuthUser(): bool
+    {
+        return $this->oauth_provider !== null;
+    }
+    
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+
 }
