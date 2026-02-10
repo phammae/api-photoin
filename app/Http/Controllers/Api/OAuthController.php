@@ -82,7 +82,7 @@ class OAuthController extends Controller
 
                 return redirect($redirectUrl);
                 
-        } } catch (\Exception $e) {
+         } } catch (\Exception $e) {
             $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
             $errorMessage = urlencode('Google OAuth gagal: ' . $e->getMessage());
             return redirect("{$frontendUrl}/login?error={$errorMessage}");
