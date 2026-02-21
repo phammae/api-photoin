@@ -72,7 +72,7 @@ class User extends Authenticatable
         return $this->status === 'aktif';
     }
     
-    public function isAuthUser(): bool
+    public function isOAuthUser(): bool
     {
         return $this->oauth_provider !== null;
     }

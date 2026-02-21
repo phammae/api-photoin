@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('kategori_alat', function (Blueprint $table) {
             $table->id();
             $table->string('nama_kategori', 50);
-            $table->text('deskripsi')->nullable;
-            $table->string('icon', 100)->nullable;
+            $table->text('deskripsi')->nullable();
+            $table->string('icon', 100)->nullable();
             $table->timestamps();
 
             // indexes
