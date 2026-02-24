@@ -10,7 +10,7 @@ class Peminjaman extends Model
 {
     use HasFactory;
 
-    protected $table = 'peminjaman_alat';
+    protected $table = 'peminjaman';
 
     protected $fillable = [
         'id_penyewa',
@@ -30,52 +30,69 @@ class Peminjaman extends Model
     ];
 
     protected $casts = [
-        'tanggal_pinjam'                 => 'date',
-        'tanggal_kembali_rencana'        => 'date',
-        'tanggal_kembali_aktual'         => 'date',
-        'disetujui_at'                   => 'datetime',
-        'total_harga'                    => 'decimal:2',
-        'total_denda'                    => 'decimal:2',
+        'tanggal_pinjam'           => 'date',
+        'tanggal_kembali_rencana'  => 'date',
+        'tanggal_kembali_aktual'   => 'date',
+        'disetujui_at'             => 'datetime',
+        'total_harga'              => 'decimal:2',
+        'total_denda'              => 'decimal:2',
     ];
 
+    // Auto-generate kode_peminjaman 
     protected static function booted(): void
     {
         static::creating(function (Peminjaman $peminjaman) {
             if (empty($peminjaman->kode_peminjaman)) {
-                $peminjaman->kode_peminjaman = self::generatedKode();
+                $peminjaman->kode_peminjaman = self::generateKode();
             }
         });
     }
 
+    public static function generateKode(): string
+    {
+        do {
+            // Format: PMJ-YYYYMMDD-XXXX  contoh: PMJ-20260210-A3F1
+            $kode = 'PMJ-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
+        } while (self::where('kode_peminjaman', $kode)->exists());
+
+        return $kode;
+    }
+
+    // Relationships
     public function penyewa()
     {
         return $this->belongsTo(User::class, 'id_penyewa');
     }
+
     public function petugas()
     {
         return $this->belongsTo(User::class, 'id_petugas');
     }
+
     public function disetujuiOleh()
     {
         return $this->belongsTo(User::class, 'disetujui_oleh');
     }
+
     public function details()
     {
         return $this->hasMany(DetailPeminjaman::class, 'id_peminjaman');
     }
+
     public function pengembalian()
     {
         return $this->hasOne(Pengembalian::class, 'id_peminjaman');
     }
 
-    // Helper untuk status
-    public function isMenunggu():bool       { return $this->status === 'menunggu'; }
-    public function isDisetujui():bool      { return $this->status === 'disetujui'; }
-    public function isDitolak():bool        { return $this->status === 'ditolak'; }
-    public function isDipinjam():bool       { return $this->status === 'dipinjam'; }
-    public function isDikembalikan():bool   { return $this->status === 'dikembalikan'; }
-    public function isDibatalkan():bool     { return $this->status === 'dibatalkan'; }
+    // Helper Methods
+    public function isMenunggu(): bool   { return $this->status === 'menunggu'; }
+    public function isDisetujui(): bool  { return $this->status === 'disetujui'; }
+    public function isDitolak(): bool    { return $this->status === 'ditolak'; }
+    public function isDipinjam(): bool   { return $this->status === 'dipinjam'; }
+    public function isDikembalikan(): bool { return $this->status === 'dikembalikan'; }
+    public function isDibatalkan(): bool { return $this->status === 'dibatalkan'; }
 
+    // Hitung hari terlambat berdasarkan tanggal sekarang atau aktual
     public function hitungHariTerlambat(): int
     {
         $tanggalAktual = $this->tanggal_kembali_aktual ?? now()->toDateObject();

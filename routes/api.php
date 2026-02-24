@@ -5,8 +5,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KategoriAlatController;
 use App\Http\Controllers\Api\OAuthController;
 use App\Http\Controllers\Api\PeminjamanController;
+use App\Http\Controllers\Api\PengembalianController;
 use Illuminate\Support\Facades\Route;
-
 // ─────────────────────────────────────────────────────────────────────────────
 // PUBLIC ROUTES (tanpa auth)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -81,5 +81,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/{id}/reject', [PeminjamanController::class, 'reject'])->name('peminjaman.reject');
             Route::post('/{id}/handover', [PeminjamanController::class, 'handover'])->name('peminjaman.handover');
         });
+    });
+
+    // ─── Pengembalian (Petugas & Admin) ───────────────────────────────────
+    Route::prefix('pengembalian')->middleware('role:petugas,admin')->group(function () {
+        Route::get('/', [PengembalianController::class, 'index'])->name('pengembalian.index');
+        Route::get('/{id}', [PengembalianController::class, 'show'])->name('pengembalian.show');
+        Route::post('/', [PengembalianController::class, 'store'])->name('pengembalian.store');
     });
 });

@@ -6,11 +6,13 @@ use App\Repositories\AlatRepository;
 use App\Repositories\Contracts\AlatRepositoryInterface;
 use App\Repositories\Contracts\KategoriAlatRepositoryInterface;
 use App\Repositories\Contracts\PeminjamanRepositoryInterface;
+use App\Repositories\Contracts\PengembalianRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\KategoriAlatRepository;
 use App\Repositories\PeminjamanRepository;
+use App\Repositories\PengembalianRepository;
 use App\Repositories\UserRepository;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\ServiceProvider; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AlatRepositoryInterface::class, AlatRepository::class);
         $this->app->bind(KategoriAlatRepositoryInterface::class, KategoriAlatRepository::class);
         $this->app->bind(PeminjamanRepositoryInterface::class, PeminjamanRepository::class);
+        $this->app->bind(PengembalianRepositoryInterface::class, PengembalianRepository::class);
     }
 
     /**
