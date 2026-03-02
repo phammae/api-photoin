@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengembalian_alat', function (Blueprint $table) {
+        Schema::create('pengembalian', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_peminjaman')->unique()->constrained('peminjaman_alat')->onDelete('restrict');
+            $table->foreignId('id_peminjaman')->unique()->constrained('peminjaman')->onDelete('restrict');
             $table->foreignId('id_petugas')->nullable()->constrained('users')->onDelete('set null');
 
             $table->date('tanggal_kembali');
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengembalian_alat');
+        Schema::dropIfExists('pengembalian');
     }
 };

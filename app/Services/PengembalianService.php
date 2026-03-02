@@ -203,7 +203,12 @@ class PengembalianService
     // Hitung denda kerusakan
     private function hitungDendaKerusakan(int $idPengembalian, int $idAlat, string $kondisi, ?string $keterangan): array
     {
-        $jenisDenda = $kondisi === 'rusak_ringan' ? 'rusak_sedang' : 'rusak_berat';
+        $jenisDenda = match ($kondisi) {
+            'kerusakan_ringan' => 'kerusakan_ringan',
+            'kerusakan_berat'  => 'kerusakan_berat',
+            default => throw new \Exception("Jenis kerusakan tidak valid"),
+        };
+        
         $aturan = AturanDenda::getAktif($jenisDenda);
         
         if (!$aturan) {

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('detail_peminjaman_alat', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_peminjaman')->constrained('peminjaman_alat')->onDelete('cascade');
+            $table->foreignId('id_peminjaman')->constrained('peminjaman')->onDelete('cascade');
             $table->foreignId('id_alat')->constrained('alat')->onDelete('restrict');
             $table->foreignId('id_harga_sewa')->nullable()->constrained('harga_sewa')->onDelete('set null');
 

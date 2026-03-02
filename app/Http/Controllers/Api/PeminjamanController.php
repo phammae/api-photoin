@@ -120,11 +120,14 @@ class PeminjamanController extends Controller
             return response()->json($result);
 
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
+            $code = $e->getCode();
+            // Validasi HTTP status code (harus 100-599)
+            $httpCode = (is_numeric($code) && $code >= 100 && $code < 600) ? $code : 500;
+    
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ], is_numeric($code) ? $code : 500);
+            ], $httpCode);
         }
     }
 

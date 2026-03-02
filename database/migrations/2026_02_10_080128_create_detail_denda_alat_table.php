@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('detail_denda_alat', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_pengembalian')->constrained('pengembalian_alat')->onDelete('cascade');
+            $table->foreignId('id_pengembalian')->constrained('pengembalian')->onDelete('cascade');
             $table->foreignId('id_alat')->constrained('alat')->onDelete('restrict');
             $table->foreignId('id_aturan_denda')->nullable()->constrained('aturan_denda')->onDelete('set null');
 

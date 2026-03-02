@@ -16,9 +16,7 @@ class PeminjamanService
         private AlatRepositoryInterface $alatRepository
     ) {}
 
-    /**
-     * Get daftar peminjaman (sesuai role)
-     */
+    // Get daftar peminjaman (sesuai role)
     public function getAll(array $filters, int $perPage, string $role, int $userId): array
     {
         if ($role === 'penyewa') {
@@ -35,9 +33,7 @@ class PeminjamanService
         ];
     }
 
-    /**
-     * Get detail peminjaman
-     */
+    // Get detail peminjaman
     public function getById(int $id, int $userId, string $role): array
     {
         $peminjaman = $this->peminjamanRepository->findById($id);
@@ -57,9 +53,7 @@ class PeminjamanService
         ];
     }
 
-    /**
-     * Ajukan peminjaman baru (Penyewa)
-     */
+    // Ajukan peminjaman baru (Penyewa)
     public function create(array $data, int $userId): array
     {
         DB::beginTransaction();
@@ -151,9 +145,7 @@ class PeminjamanService
         }
     }
 
-    /**
-     * Setujui peminjaman (Petugas)
-     */
+    // Setujui peminjaman (Petugas)
     public function approve(int $id, int $petugasId, ?string $catatan = null): array
     {
         $peminjaman = $this->peminjamanRepository->findById($id);
@@ -166,7 +158,8 @@ class PeminjamanService
             throw new \Exception('Peminjaman tidak dalam status menunggu persetujuan', 400);
         }
 
-        $this->peminjamanRepository->updateStatus($peminjaman, 'disetujui', [
+        $this->peminjamanRepository->update($peminjaman, [
+            'status'           => 'disetujui',
             'id_petugas'       => $petugasId,
             'disetujui_oleh'   => $petugasId,
             'disetujui_at'     => now(),
@@ -188,9 +181,7 @@ class PeminjamanService
         ];
     }
 
-    /**
-     * Tolak peminjaman (Petugas)
-     */
+    // Tolak peminjaman (Petugas)
     public function reject(int $id, int $petugasId, string $alasan): array
     {
         $peminjaman = $this->peminjamanRepository->findById($id);
@@ -203,7 +194,8 @@ class PeminjamanService
             throw new \Exception('Peminjaman tidak dalam status menunggu persetujuan', 400);
         }
 
-        $this->peminjamanRepository->updateStatus($peminjaman, 'ditolak', [
+        $this->peminjamanRepository->update($peminjaman, [
+            'status'          => 'ditolak',
             'id_petugas'      => $petugasId,
             'disetujui_oleh'  => $petugasId,
             'disetujui_at'    => now(),
@@ -225,9 +217,7 @@ class PeminjamanService
         ];
     }
 
-    /**
-     * Batalkan peminjaman (Penyewa)
-     */
+    // Batalkan peminjaman (Penyewa)
     public function cancel(int $id, int $userId): array
     {
         $peminjaman = $this->peminjamanRepository->findById($id);
@@ -244,7 +234,9 @@ class PeminjamanService
             throw new \Exception('Peminjaman tidak dapat dibatalkan', 400);
         }
 
-        $this->peminjamanRepository->updateStatus($peminjaman, 'dibatalkan');
+        $this->peminjamanRepository->update($peminjaman, [
+            'status'          => 'dibatalkan'
+        ]);
 
         LogAktivitas::log(
             $userId,
@@ -260,9 +252,7 @@ class PeminjamanService
         ];
     }
 
-    /**
-     * Serahkan alat (update status jadi dipinjam) - Petugas
-     */
+    // Serahkan alat (update status jadi dipinjam) - Petugas
     public function handover(int $id, int $petugasId): array
     {
         $peminjaman = $this->peminjamanRepository->findById($id);
@@ -278,7 +268,8 @@ class PeminjamanService
         DB::beginTransaction();
         try {
             // Update status peminjaman
-            $this->peminjamanRepository->updateStatus($peminjaman, 'dipinjam', [
+            $this->peminjamanRepository->update($peminjaman, [
+                'status'     => 'dipinjam', 
                 'id_petugas' => $petugasId,
             ]);
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('peminjaman_alat', function (Blueprint $table) {
+        Schema::create('peminjaman', function (Blueprint $table) {
             $table->id();
             
             $table->foreignId('id_penyewa')->constrained('users')->onDelete('restrict');
@@ -26,7 +26,7 @@ return new class extends Migration
             
             $table->enum('status', [
                 'menunggu',
-                'disetejui',
+                'disetujui',
                 'ditolak',
                 'dipinjam',
                 'dikembalikan',
@@ -38,7 +38,7 @@ return new class extends Migration
 
             $table->text('catatan_penyewa')->nullable();
             $table->text('catatan_petugas')->nullable();
-            $table->text('alasan_ditolak')->nullable();
+            $table->text('alasan_tolak')->nullable();
             
             
             $table->foreignId('disetujui_oleh')->nullable()->constrained('users')->onDelete('set null');
@@ -61,6 +61,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('peminjaman_alat');
+        Schema::dropIfExists('peminjaman');
     }
 };

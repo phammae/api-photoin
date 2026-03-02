@@ -30,6 +30,7 @@ class PengembalianController extends Controller
             $result = $this->pengembalianService->getAll($filters, $perPage);
 
             return response()->json($result);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -46,36 +47,55 @@ class PengembalianController extends Controller
             return response()->json($result);
 
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
+            $code = $this->getValidHttpCode($e->getCode());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ], is_numeric($code) ? $code : 500);
+            ], $code);
         }
     }
 
     // Post /api/pengembalian Proses pengembalian admin dan petugas
-    public function store (Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
                 'id_peminjaman'   => 'required|exists:peminjaman,id',
                 'tanggal_kembali' => 'nullable|date',
                 'catatan'         => 'nullable|string',
-                'alat'            => 'required|array',
-                'alat.*.kondisi'  => 'required|in:baik,rusak_ringan,rusak_berat',
+                'alat'            => 'required|array|min:1',
+                'alat.*.id_alat'  => 'required|exists:alat,id',
+                'alat.*.kondisi'  => 'required|in:baik,kerusakan_ringan,kerusakan_berat',
                 'alat.*.keterangan' => 'nullable|string',
                 'alat.*.kelengkapan_hilang' => 'nullable|array',
             ], [
                 'id_peminjaman.required' => 'ID peminjaman wajib diisi',
                 'id_peminjaman.exists'   => 'Peminjaman tidak ditemukan',
                 'alat.required'          => 'Data kondisi alat wajib diisi',
+                'alat.*.id_alat.required' => 'ID alat wajib diisi',
                 'alat.*.kondisi.required' => 'Kondisi alat wajib dipilih',
+                'alat.*.kondisi.in'       => 'Kondisi harus: baik, kerusakan_ringan, atau kerusakan_berat',
             ]);
+
+            // Transform array ke format yang diharapkan Service
+            $transformedData = [
+                'tanggal_kembali' => $validated['tanggal_kembali'] ?? null,
+                'catatan'         => $validated['catatan'] ?? null,
+                'alat'            => [],
+            ];
+
+            // Convert array format ke object dengan key ID alat
+            foreach ($validated['alat'] as $item) {
+                $transformedData['alat'][$item['id_alat']] = [
+                    'kondisi'             => $item['kondisi'],
+                    'keterangan'          => $item['keterangan'] ?? null,
+                    'kelengkapan_hilang'  => $item['kelengkapan_hilang'] ?? [],
+                ];
+            }
 
             $result = $this->pengembalianService->process(
                 $validated['id_peminjaman'],
-                $validated,
+                $transformedData,
                 $request->user()->id
             );
 
@@ -88,11 +108,16 @@ class PengembalianController extends Controller
                 'errors'  => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            $code = $e->getCode() ?: 500;
+            $code = $this->getValidHttpCode($e->getCode());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ], is_numeric($code) ? $code : 500);
+            ], $code);
         }
+    }
+
+    private function getValidHttpCode($code): int
+    {
+        return (is_numeric($code) && $code >= 100 && $code < 600) ? (int) $code : 500;
     }
 }
